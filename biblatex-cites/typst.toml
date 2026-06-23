@@ -1,0 +1,9 @@
+[package]
+name = "biblatex-cites"
+version = "0.1.0"
+entrypoint = "lib.typ"
+authors = ["Diego Aguilar (https://github.com/CRAG666)"]
+license = "GPL-3.0-or-later"
+description = "biblatex-style cite commands (textcite, parencite, citeauthor, citeyear, fullcite) with separate in-text vs. bibliography author counts, parsed from the .bib."
+keywords = ["bibliography", "citation", "biblatex", "textcite", "ieee"]
+categories = ["scripting"]
