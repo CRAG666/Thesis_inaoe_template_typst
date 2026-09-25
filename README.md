@@ -32,9 +32,14 @@ Spanish/English support.
 ## Usage
 
 ```bash
-typst compile --font-path fonts example.typ   # produces example.pdf
-typst watch   --font-path fonts example.typ   # live recompile while editing
+typst watch --ignore-system-fonts --font-path fonts example.typ   # while editing
+typst compile --ignore-system-fonts --font-path fonts example.typ # produces example.pdf
 ```
+
+Use `watch` while writing: it retains the cache between edits and recompiles
+only what is needed. `--ignore-system-fonts` skips system-wide font discovery;
+this template uses the fonts in `fonts/` and those embedded in Typst.
+If you add other fonts, include their directory with another `--font-path`.
 
 Configure the template by editing the `inaoe-thesis.with(...)` call:
 

@@ -33,9 +33,14 @@ diseño de página, las páginas preliminares y el soporte español/inglés.
 ## Uso
 
 ```bash
-typst compile --font-path fonts example.typ   # genera example.pdf
-typst watch   --font-path fonts example.typ   # recompila en vivo mientras editas
+typst watch --ignore-system-fonts --font-path fonts example.typ   # mientras editas
+typst compile --ignore-system-fonts --font-path fonts example.typ # genera example.pdf
 ```
+
+Usa `watch` durante la escritura: conserva la caché entre cambios y recompila
+solo lo necesario. `--ignore-system-fonts` evita buscar fuentes en todo el
+sistema; esta plantilla utiliza las de `fonts/` y las integradas en Typst.
+Si añades otras fuentes, incluye su directorio con otro `--font-path`.
 
 Configura la plantilla editando la llamada `inaoe-thesis.with(...)`:
 

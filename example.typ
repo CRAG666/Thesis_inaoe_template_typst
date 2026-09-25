@@ -44,7 +44,7 @@ Con más de cuatro autores: #textcite(<manyAuthors>).
 Con sufijo: #parencite(<exampleRef>, supplement: [p. 10]) y solo año #citeyear(<exampleRef>).
 
 // ---- Formas de citar en Typst -------------------------------
-// Equivalencias con LaTeX (estilo IEEE numérico vía ieee.csl):
+// Equivalencias con LaTeX (estilo IEEE numérico integrado):
 //
 //   LaTeX                Alias de la plantilla            Resultado
 //   \cite{key}           @key  o  #parencite(<key>)        [1]
@@ -55,7 +55,7 @@ Con sufijo: #parencite(<exampleRef>, supplement: [p. 10]) y solo año #citeyear(
 //
 // La forma corta `@key` -> [n]; admite sufijo: `@key[p. 10]`.
 // Los alias (textcite/citeauthor/citeyear) leen los nombres del .bib en
-// inaoe-tesis.typ; el formato de [n] y de Referencias lo da ieee.csl.
+// biblatex-cites/lib.typ; el formato de [n] y de Referencias lo da Typst.
 
 = Results
 
@@ -81,6 +81,6 @@ Text...
 // ---- Bibliografía -------------------------------------------
 // Estilo IEEE integrado de Typst (numérico): Referencias con todos los
 // autores y et al. en 7+. El recorte "et al." de #textcite NO depende de
-// esto; se controla en _authors-display (inaoe-tesis.typ).
+// esto; se controla en biblatex-cites mediante et-al-min.
 #context bibliography("references.bib", style: "ieee",
   title: if text.lang == "es" { "Referencias" } else { "References" })

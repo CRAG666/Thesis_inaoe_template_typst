@@ -20,6 +20,9 @@
   (
     chapter: "Capítulo", contents: "Índice",
     lof: "Lista de figuras", lot: "Lista de tablas",
+    dedication: "Dedicatoria",
+    acknowledgements: "Agradecimientos",
+    abstract: "Resumen",
     by: "Por:",
     req: "Tesis sometida como requisito parcial para obtener el grado de:",
     at: "en el", supervised: "Asesor:",
@@ -31,6 +34,9 @@
   (
     chapter: "Chapter", contents: "Index",
     lof: "Figure list", lot: "Table list",
+    dedication: "Dedication",
+    acknowledgements: "Acknowledgements",
+    abstract: "Abstract",
     by: "By:",
     req: "Thesis submitted as a requirement for obtaining the degree of:",
     at: "at the", supervised: "Supervised by:",
@@ -43,7 +49,7 @@
 
 // ---- Portada -------------------------------------------------
 #let cover(s, title, author, advisor, degree, month, year) = {
-  set page(paper: "us-letter", margin: 0cm, header: none, footer: none)
+  set page(paper: "us-letter", margin: 0cm, numbering: none, header: none, footer: none)
   set text(font: ("TeX Gyre Termes", "New Computer Modern"))
 
   // Marco azul (coordenadas en cm desde la esquina superior izquierda)
@@ -54,8 +60,12 @@
   place(top + left, dx: 19.46cm, dy: 2.36cm, line(length: 20.5cm, angle: 90deg, stroke: bstroke))
 
   // Logotipos
-  place(top + left, dx: 2.7cm, dy: 2.40cm, image("cover/Inaoe.pdf", width: 3.097cm))
-  place(top + left, dx: 16.85cm, dy: 22.57cm, image("cover/cmyk-original.jpg", width: 3.124cm))
+  place(top + left, dx: 2.7cm, dy: 2.40cm,
+    image("cover/Inaoe.pdf", width: 3.097cm,
+      alt: "Instituto Nacional de Astrofísica, Óptica y Electrónica (INAOE)"))
+  place(top + left, dx: 16.85cm, dy: 22.57cm,
+    image("cover/cmyk-original.jpg", width: 3.124cm,
+      alt: "INAOE"))
 
   // Bloque de texto centrado dentro del marco
   place(top + left, dx: 6.85cm, box(width: 12cm, height: 27.94cm, inset: (top: 1.5cm, bottom: 2.7cm),
@@ -98,16 +108,16 @@
 #let chapter-head(s, it) = {
   pagebreak(weak: true)
   let thick = line(length: 100%, stroke: 4pt)
-  set align(center)
   v(10pt)
   if it.numbering != none {
     grid(columns: (1fr, auto, 1fr), column-gutter: 1em, align: horizon,
-      thick, smallcaps[#s.chapter #counter(heading).display()], thick)
+      thick, smallcaps[#s.chapter #counter(heading).display(it.numbering)], thick)
     v(10pt)
   }
   line(length: 100%)
   v(10pt)
-  text(size: 24.88pt, weight: "bold")[#it.body]
+  block(width: 100%, above: 0pt, below: 0pt,
+    text(size: 24.88pt, weight: "bold", it.body))
   v(10pt)
   line(length: 100%)
   v(60pt)
@@ -135,7 +145,8 @@
     font: ("TeX Gyre Termes", "New Computer Modern"))
   set par(leading: 1em, spacing: 0.75em, first-line-indent: 10mm, justify: true)
   set heading(numbering: "1.1")
-  show heading.where(level: 1): it => chapter-head(s, it)
+  show heading.where(level: 1): set align(center)
+  show heading.where(level: 1): chapter-head.with(s)
 
   // Portada
   cover(s, title, author, advisor, degree, month, year)
@@ -150,13 +161,16 @@
   outline(title: s.lof, target: figure.where(kind: image))
   outline(title: s.lot, target: figure.where(kind: table))
 
-  let front(title, content) = {
-    heading(level: 1, numbering: none, outlined: true, title)
-    content
+  for (title, content) in (
+    (s.dedication, dedication),
+    (s.acknowledgements, acknowledgements),
+    (s.abstract, abstract),
+  ) {
+    if content != none {
+      heading(level: 1, numbering: none, outlined: true, title)
+      content
+    }
   }
-  if dedication != none { front(if lang == "es" { "Dedicatoria" } else { "Dedication" }, dedication) }
-  if acknowledgements != none { front(if lang == "es" { "Agradecimientos" } else { "Acknowledgements" }, acknowledgements) }
-  if abstract != none { front(if lang == "es" { "Resumen" } else { "Abstract" }, abstract) }
 
   // Cuerpo principal (numeración arábiga)
   set page(numbering: "1")
