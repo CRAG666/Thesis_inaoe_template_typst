@@ -2,7 +2,7 @@
 //  Tesis INAOE  –  ejemplo (Typst)
 // ============================================================
 
-#import "inaoe-tesis.typ": inaoe-thesis, appendix, textcite, parencite, citeauthor, citeyear, fullcite
+#import "inaoe-tesis.typ": appendix, citeauthor, citeyear, fullcite, inaoe-thesis, parencite, textcite
 
 #show: inaoe-thesis.with(
   lang: "en", // "es" para español
@@ -39,7 +39,7 @@ Text #textcite(<exampleRef>).
 
 // \textcite recorta a "Primero et al." con 3+ autores, pero la lista de
 // Referencias muestra todos (recuentos separados, como biblatex):
-Con más de cuatro autores: #textcite(<manyAuthors>).
+Con más de tres autores: #textcite(<manyAuthors>).
 
 Con sufijo: #parencite(<exampleRef>, supplement: [p. 10]) y solo año #citeyear(<exampleRef>).
 
@@ -79,8 +79,6 @@ Text...
 - *Article title*, Journal Name, 2025.
 
 // ---- Bibliografía -------------------------------------------
-// Estilo IEEE integrado de Typst (numérico): Referencias con todos los
-// autores y et al. en 7+. El recorte "et al." de #textcite NO depende de
-// esto; se controla en biblatex-cites mediante et-al-min.
-#context bibliography("references.bib", style: "ieee",
-  title: if text.lang == "es" { "Referencias" } else { "References" })
+#context bibliography("references.bib", style: "ieee", title: if text.lang == "es" { "Referencias" } else {
+  "References"
+})
