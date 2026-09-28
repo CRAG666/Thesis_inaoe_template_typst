@@ -15,11 +15,6 @@ else
 fi
 
 target="$package_path/local/inaoe-tesis/0.1.0"
-if [[ -e $target || -L $target ]]; then
-  printf 'La versión ya está instalada: %s\n' "$target" >&2
-  exit 1
-fi
-
 temp_dir=$(mktemp -d)
 trap 'rm -rf -- "$temp_dir"' EXIT
 curl -fsSL --retry 3 \
@@ -29,7 +24,8 @@ tar -xzf "$temp_dir/source.tar.gz" -C "$temp_dir"
 source_dir=$temp_dir/Thesis_inaoe_template_typst-main
 
 mkdir -p -- "$(dirname -- "$target")"
-mkdir -- "$target"
+stage=$(mktemp -d "$(dirname -- "$target")/.inaoe-tesis-0.1.0.XXXXXX")
+trap 'rm -rf -- "$temp_dir" "$stage"' EXIT
 cp -R -- \
   "$source_dir/typst.toml" \
   "$source_dir/inaoe-tesis.typ" \
@@ -39,6 +35,8 @@ cp -R -- \
   "$source_dir/README.md" \
   "$source_dir/README.es.md" \
   "$source_dir/LICENSE" \
-  "$target/"
+  "$stage/"
+rm -rf -- "$target"
+mv -- "$stage" "$target"
 printf 'Paquete instalado en %s\n' "$target"
 printf 'Crea un proyecto con: typst init @local/inaoe-tesis:0.1.0 mi-tesis\n'

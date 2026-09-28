@@ -1,4 +1,6 @@
-#import "@local/inaoe-tesis:0.1.0": inaoe-thesis
+#import "@local/inaoe-tesis:0.1.0": inaoe-thesis, thesis-cites
+#let bib-source = read("references.bib")
+#let (textcite, parencite, citeauthor, citeyear, fullcite) = thesis-cites(bib-source)
 
 #show: inaoe-thesis.with(
   lang: "es",
@@ -8,7 +10,7 @@
   degree: "Grado académico",
   month: "Mes",
   abstract: [Escribe aquí el resumen de tu tesis.],
-  bib-source: read("references.bib"),
+  bib-source: bib-source,
 )
 
 = Introducción

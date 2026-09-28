@@ -35,7 +35,8 @@ diseño de página, las páginas preliminares y el soporte español/inglés.
 
 Revisa [install.sh](install.sh) o [install.ps1](install.ps1) antes de ejecutarlo:
 ambos descargan y ejecutan código de la rama `main`. Necesitas el CLI de Typst.
-No sobrescriben una versión existente y respetan `TYPST_PACKAGE_PATH`.
+Reemplazan la instalación existente de `@local/inaoe-tesis:0.1.0` y respetan
+`TYPST_PACKAGE_PATH`.
 
 ### Linux y macOS
 

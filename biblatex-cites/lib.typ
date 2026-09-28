@@ -56,14 +56,19 @@
 
 #let _parse-bib(raw) = {
   let entries = (:)
+  let key-pattern = regex("\\{([^,]*)")
+  let author-pattern = regex("(?i)author\\s*=\\s*[{\"]([^}\"]*)[}\"]")
+  let year-pattern = regex("(?i)year\\s*=\\s*[{\"]?\\s*(\\d{4})")
+  let author-separator = regex("(?i)\\s+and\\s+")
   for chunk in raw.split("@").slice(1) {
-    let key = chunk.split("{").at(1, default: "").split(",").at(0).trim()
+    let key-match = chunk.match(key-pattern)
+    let key = if key-match == none { "" } else { key-match.captures.first().trim() }
     if key == "" { continue }
-    let author-match = chunk.match(regex("(?i)author\\s*=\\s*[{\"]([^}\"]*)[}\"]"))
+    let author-match = chunk.match(author-pattern)
     let authors = if author-match == none { () } else {
-      author-match.captures.first().split(regex("(?i)\\s+and\\s+")).map(_fmt-name)
+      author-match.captures.first().split(author-separator).map(_fmt-name)
     }
-    let year-match = chunk.match(regex("(?i)year\\s*=\\s*[{\"]?\\s*(\\d{4})"))
+    let year-match = chunk.match(year-pattern)
     let year = if year-match == none { "" } else { year-match.captures.first() }
     entries.insert(key, (authors: authors, year: year))
   }

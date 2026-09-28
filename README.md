@@ -34,7 +34,8 @@ Spanish/English support.
 
 Review [install.sh](install.sh) or [install.ps1](install.ps1) before running it:
 both download and execute code from the `main` branch. You need the Typst CLI.
-Neither overwrites an existing version; both respect `TYPST_PACKAGE_PATH`.
+Both replace the existing `@local/inaoe-tesis:0.1.0` installation and respect
+`TYPST_PACKAGE_PATH`.
 
 ### Linux and macOS
 
