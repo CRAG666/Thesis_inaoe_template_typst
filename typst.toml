@@ -1,0 +1,11 @@
+[package]
+name = "inaoe-tesis"
+version = "0.1.0"
+entrypoint = "inaoe-tesis.typ"
+authors = ["Diego Aguilar (https://github.com/CRAG666)"]
+license = "GPL-3.0-or-later"
+description = "Thesis template for the Instituto Nacional de Astrofísica, Óptica y Electrónica."
+
+[template]
+path = "template"
+entrypoint = "example.typ"

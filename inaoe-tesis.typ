@@ -22,7 +22,7 @@
     lof: "Lista de figuras", lot: "Lista de tablas",
     dedication: "Dedicatoria",
     acknowledgements: "Agradecimientos",
-    abstract: "Resumen",
+    abstract: "Resumen", references: "Referencias",
     by: "Por:",
     req: "Tesis sometida como requisito parcial para obtener el grado de:",
     at: "en el", supervised: "Asesor:",
@@ -36,7 +36,7 @@
     lof: "Figure list", lot: "Table list",
     dedication: "Dedication",
     acknowledgements: "Acknowledgements",
-    abstract: "Abstract",
+    abstract: "Abstract", references: "References",
     by: "By:",
     req: "Thesis submitted as a requirement for obtaining the degree of:",
     at: "at the", supervised: "Supervised by:",
@@ -136,6 +136,7 @@
   dedication: none,
   acknowledgements: none,
   abstract: none,
+  bib-source: none,
   body,
 ) = {
   let s = strings(lang)
@@ -177,6 +178,10 @@
   counter(page).update(1)
 
   body
+
+  if bib-source != none {
+    bibliography(bytes(bib-source), style: "ieee", title: s.references)
+  }
 }
 
 // Apéndices: capítulos numerados con letras (A, B, ...)
@@ -186,11 +191,6 @@
   body
 }
 
-// ---- Alias de citas estilo LaTeX -----------------------------
-// textcite/parencite/citeauthor/citeyear/fullcite con recuento de nombres
-// separado citas vs. Referencias. Implementado en el paquete local
-// biblatex-cites (ver biblatex-cites/lib.typ). read() se llama AQUÍ para
-// que la ruta del .bib resuelva relativa a esta plantilla.
+// Las citas se configuran desde el documento para leer su propia bibliografía.
 #import "biblatex-cites/lib.typ": biblatex-cites
-#let _bib-path = "references.bib" // cámbialo si tu .bib se llama distinto
-#let (textcite, parencite, citeauthor, citeyear, fullcite) = biblatex-cites(read(_bib-path))
+#let thesis-cites = biblatex-cites

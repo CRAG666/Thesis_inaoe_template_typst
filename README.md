@@ -15,12 +15,13 @@ Spanish/English support.
 
 | File | Purpose |
 |------|---------|
-| `inaoe-tesis.typ` | The template (cover, styles, layout, cite aliases). Don't edit unless customizing. |
-| `example.typ` | Working example — copy it as the starting point for your thesis. |
-| `references.bib` | Sample BibTeX bibliography. |
-| `cover/` | Institutional logos used on the cover. |
-| `biblatex-cites/` | Standalone Typst package powering the `textcite`/`citeauthor`/… commands. Reusable in any project — see its own README. |
-| `fonts/` | TeX Gyre Termes (`.otf`), bundled so the CLI matches the web app. |
+| `install.sh`, `install.ps1` | Install the local Typst package on Unix and Windows, respectively. |
+| `typst.toml` | Package metadata and `typst init` configuration. |
+| `inaoe-tesis.typ` | Thesis style, importable as `@local/inaoe-tesis:0.1.0`. |
+| `template/` | Files copied into each thesis by `typst init`: example, bibliography, and fonts. |
+| `example.typ`, `references.bib`, `fonts/` | Standalone example for working directly from this repository. |
+| `cover/` | Institutional logos bundled with the package. |
+| `biblatex-cites/` | `textcite`/`citeauthor`/… commands; also a standalone package (see its README). |
 
 ## Requirements
 
@@ -28,6 +29,40 @@ Spanish/English support.
 - Fonts: the repo ships **TeX Gyre Termes** in `fonts/`. On
   [typst.app](https://typst.app) it's already available, so nothing to do there.
   The Typst CLI only bundles New Computer Modern, so point it at `fonts/` (below).
+
+## Local installation
+
+Review [install.sh](install.sh) or [install.ps1](install.ps1) before running it:
+both download and execute code from the `main` branch. You need the Typst CLI.
+Neither overwrites an existing version; both respect `TYPST_PACKAGE_PATH`.
+
+### Linux and macOS
+
+You need `curl`, `tar`, and Bash. On Linux, the default location is
+`~/.local/share/typst/packages/local/inaoe-tesis/0.1.0/` (`XDG_DATA_HOME`
+changes this path). On macOS, it is under `~/Library/Application Support`.
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/CRAG666/Thesis_inaoe_template_typst/main/install.sh | bash
+typst init @local/inaoe-tesis:0.1.0 my-thesis
+cd my-thesis
+```
+
+### Windows (PowerShell)
+
+The default location is `%APPDATA%\typst\packages\local\inaoe-tesis\0.1.0`.
+Bash and `tar` are not needed.
+
+```powershell
+irm https://raw.githubusercontent.com/CRAG666/Thesis_inaoe_template_typst/main/install.ps1 | iex
+typst init @local/inaoe-tesis:0.1.0 my-thesis
+cd my-thesis
+```
+
+`typst init` copies `example.typ`, `references.bib`, and `fonts/` into your
+project. The style and logos remain in the local package. To share a thesis
+without requiring a package installation, use a full copy of this repository
+and its `example.typ`, which imports the style through a relative path.
 
 ## Usage
 
@@ -44,7 +79,7 @@ If you add other fonts, include their directory with another `--font-path`.
 Configure the template by editing the `inaoe-thesis.with(...)` call:
 
 ```typst
-#import "inaoe-tesis.typ": inaoe-thesis, appendix, textcite, parencite
+#import "@local/inaoe-tesis:0.1.0": inaoe-thesis
 
 #show: inaoe-thesis.with(
   lang: "en",                    // "es" for Spanish
@@ -57,6 +92,7 @@ Configure the template by editing the `inaoe-thesis.with(...)` call:
   dedication: [...],
   acknowledgements: [...],
   abstract: [...],
+  bib-source: read("references.bib"),
 )
 
 = Introduction
@@ -65,10 +101,13 @@ Configure the template by editing the `inaoe-thesis.with(...)` call:
 
 ### Citations
 
-Use Typst's native `@key` (→ `[1]`) or the LaTeX-style aliases provided by the
-template, which mirror `biblatex`'s commands with IEEE numeric style:
+Use `@key` for IEEE-style numeric citations. If you need LaTeX-style commands
+such as `textcite`, add them to your document:
 
 ```typst
+#import "@local/inaoe-tesis:0.1.0": thesis-cites
+#let (textcite, parencite, citeauthor, citeyear, fullcite) = thesis-cites(read("references.bib"))
+
 @exampleRef                                // [1]
 #textcite(<exampleRef>)                     // J. Doe and J. Roe [1]
 #textcite(<manyAuthors>)                    // J. Smith et al. [2]
@@ -84,8 +123,11 @@ alone (its prose form is tied to the bibliography's author rendering), so the
 aliases read the author names straight from the `.bib` and append the numeric
 `[n]` from `#cite`. The reference-list format comes from Typst's built-in `ieee`
 style. This lives in the standalone [`biblatex-cites/`](biblatex-cites/) package
-(reusable in any project); the template just wires it up in `inaoe-tesis.typ`
-(change `_bib-path` there, or pass `et-al-min:` to `biblatex-cites`).
+(reusable in any project). The template reads the `.bib` from *your thesis*
+and generates the reference list at the end, with an English or Spanish title
+based on `lang`. Change the path in `read(...)` if needed; for advanced citations
+you can also pass `et-al-min:` to `thesis-cites`. Omit `bib-source:` if you do
+not use a bibliography.
 
 ### Appendices
 

@@ -2,7 +2,9 @@
 //  Tesis INAOE  –  ejemplo (Typst)
 // ============================================================
 
-#import "inaoe-tesis.typ": appendix, citeauthor, citeyear, fullcite, inaoe-thesis, parencite, textcite
+#import "inaoe-tesis.typ": appendix, inaoe-thesis, thesis-cites
+#let bib-source = read("references.bib")
+#let (textcite, parencite, citeauthor, citeyear, fullcite) = thesis-cites(bib-source)
 
 #show: inaoe-thesis.with(
   lang: "en", // "es" para español
@@ -16,6 +18,7 @@
   dedication: [Dedicado a...],
   acknowledgements: [I wish to express my sincere gratitude to...],
   abstract: [This thesis presents...],
+  bib-source: bib-source,
 )
 
 = Introduction
@@ -54,8 +57,8 @@ Con sufijo: #parencite(<exampleRef>, supplement: [p. 10]) y solo año #citeyear(
 //   \cite[p. 10]{key}    #parencite(<key>, supplement: [p. 10])   [1, p. 10]
 //
 // La forma corta `@key` -> [n]; admite sufijo: `@key[p. 10]`.
-// Los alias (textcite/citeauthor/citeyear) leen los nombres del .bib en
-// biblatex-cites/lib.typ; el formato de [n] y de Referencias lo da Typst.
+// Los alias (textcite/citeauthor/citeyear) leen los nombres del .bib desde
+// este documento; el formato de [n] y de Referencias lo da Typst.
 
 = Results
 
@@ -77,8 +80,3 @@ Text...
 = Published Articles
 
 - *Article title*, Journal Name, 2025.
-
-// ---- Bibliografía -------------------------------------------
-#context bibliography("references.bib", style: "ieee", title: if text.lang == "es" { "Referencias" } else {
-  "References"
-})
