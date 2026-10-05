@@ -34,7 +34,7 @@
 } else {
   (
     chapter: "Chapter", contents: "Contents",
-    lof: "List of figures", lot: "List of tables",
+    lof: "List of Figures", lot: "List of Tables",
     dedication: "Dedication",
     acknowledgements: "Acknowledgements",
     abstract: "Abstract", references: "References",
@@ -123,7 +123,7 @@
   place(top + left, dx: 6.85cm, dy: 2.40cm, box(width: 12cm, height: 20.17cm,
     align(center + horizon)[
       #set par(spacing: 0pt, leading: 0.775em, justify: false)
-      #block(text(size: 14.4pt, weight: "bold", par(leading: 1.15em)[#title \ #degree]))
+      #block(text(size: 17.28pt, weight: "bold", par(leading: 0.85em)[#title \ #degree]))
       #v(1.8cm)
       #s.by-lower
       #v(0.75cm)
@@ -134,7 +134,7 @@
       #text(weight: "bold")[#advisor]
       #v(2.2cm)
       Instituto Nacional de Astrofísica, Óptica y Electrónica \
-      #text(size: 14.4pt)[© #department]
+      © #department
       #v(1.25cm)
       #if month != none and month != "" [#month, ]#year \
       #s.place
