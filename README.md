@@ -90,6 +90,9 @@ Configure the template by editing the `inaoe-thesis.with(...)` call:
   degree: "M.S. in Computer Science",
   month: "October",
   // year: 2025,                 // optional; defaults to current year
+  // requirement: none,          // optional; none omits the "Thesis submitted as a requirement..." line, or pass your own text
+  // cover: "proposal",          // optional; CCC dissertation-proposal cover instead of the thesis cover
+  // department: "Coordinación de Ciencias Computacionales", // optional; "proposal" cover only
   dedication: [...],
   acknowledgements: [...],
   abstract: [...],

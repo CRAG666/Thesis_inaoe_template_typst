@@ -23,7 +23,8 @@
     dedication: "Dedicatoria",
     acknowledgements: "Agradecimientos",
     abstract: "Resumen", references: "Referencias",
-    by: "Por:",
+    by: "Por:", by-lower: "por", advisors: "Asesores:",
+    place: "Santa María de Tonantzintla, Puebla, CP 72840",
     req: "Tesis sometida como requisito parcial para obtener el grado de:",
     at: "en el", supervised: "Asesor:",
     rights: "Derechos reservados",
@@ -32,12 +33,13 @@
   )
 } else {
   (
-    chapter: "Chapter", contents: "Index",
-    lof: "Figure list", lot: "Table list",
+    chapter: "Chapter", contents: "Contents",
+    lof: "List of figures", lot: "List of tables",
     dedication: "Dedication",
     acknowledgements: "Acknowledgements",
     abstract: "Abstract", references: "References",
-    by: "By:",
+    by: "By:", by-lower: "by", advisors: "Doctoral Advisors:",
+    place: "Santa María de Tonantzintla, Puebla, CP 72840",
     req: "Thesis submitted as a requirement for obtaining the degree of:",
     at: "at the", supervised: "Supervised by:",
     rights: "All rights reserved",
@@ -48,24 +50,28 @@
 }
 
 // ---- Portada -------------------------------------------------
-#let cover(s, title, author, advisor, degree, month, year) = {
-  set page(paper: "us-letter", margin: 0cm, numbering: none, header: none, footer: none)
-  set text(font: ("TeX Gyre Termes", "New Computer Modern"))
-
-  // Marco azul (coordenadas en cm desde la esquina superior izquierda)
+// Marco azul y logotipos comunes a ambas portadas (coordenadas en cm desde la
+// esquina superior izquierda).
+#let cover-frame() = {
   let bstroke = 0.8mm + DBlue
   place(top + left, dx: 6.2cm, dy: 2.40cm, line(length: 13.3cm, stroke: bstroke))
   place(top + left, dx: 6.2cm, dy: 25.59cm, line(length: 10.6cm, stroke: bstroke))
   place(top + left, dx: 6.24cm, dy: 2.43cm, line(length: 23.2cm, angle: 90deg, stroke: bstroke))
   place(top + left, dx: 19.46cm, dy: 2.36cm, line(length: 20.5cm, angle: 90deg, stroke: bstroke))
 
-  // Logotipos
   place(top + left, dx: 2.7cm, dy: 2.40cm,
     image("cover/Inaoe.pdf", width: 3.097cm,
       alt: "Instituto Nacional de Astrofísica, Óptica y Electrónica (INAOE)"))
   place(top + left, dx: 16.85cm, dy: 22.57cm,
     image("cover/cmyk-original.jpg", width: 3.124cm,
       alt: "INAOE"))
+}
+
+// Portada de tesis (formato oficial)
+#let cover-thesis(s, title, author, advisor, degree, month, year, requirement) = {
+  set page(paper: "us-letter", margin: 0cm, numbering: none, header: none, footer: none)
+  set text(font: ("TeX Gyre Termes", "New Computer Modern"))
+  cover-frame()
 
   // Bloque de texto centrado dentro del marco
   place(top + left, dx: 6.85cm, box(width: 12cm, height: 27.94cm, inset: (top: 1.5cm, bottom: 2.7cm),
@@ -77,7 +83,7 @@
       #v(0.2fr)
       #text(weight: "bold")[#author]
       #v(0.5fr)
-      #s.req
+      #if requirement == auto [#s.req] else if requirement != none [#requirement]
       #v(0.2fr)
       #text(weight: "bold")[#upper(degree)]
       #v(0.2fr)
@@ -101,6 +107,37 @@
       // Alineado al borde izquierdo del texto, con sangría de primera
       // línea; margen derecho para acercarse al logo sin tocarlo.
       #align(left, pad(right: 2.3cm, [#h(10mm)#s.grant]))
+    ]))
+}
+
+// Portada de propuesta de tesis (formato usado por la Coordinación de Ciencias
+// Computacionales): título y grado en negritas, "by", autor, asesores, INAOE,
+// coordinación, fecha y lugar; sin derechos ni permiso de reproducción.
+// Proporciones calibradas sobre propuestas aprobadas (2025).
+#let cover-proposal(s, title, author, advisor, degree, month, year, department) = {
+  set page(paper: "us-letter", margin: 0cm, numbering: none, header: none, footer: none)
+  set text(font: ("TeX Gyre Termes", "New Computer Modern"), size: 12pt)
+  cover-frame()
+
+  // Bloque centrado vertical y horizontalmente entre el marco superior y el logotipo inferior
+  place(top + left, dx: 6.85cm, dy: 2.40cm, box(width: 12cm, height: 20.17cm,
+    align(center + horizon)[
+      #set par(spacing: 0pt, leading: 0.775em, justify: false)
+      #block(text(size: 14.4pt, weight: "bold", par(leading: 1.15em)[#title \ #degree]))
+      #v(1.8cm)
+      #s.by-lower
+      #v(0.75cm)
+      #text(weight: "bold")[#author]
+      #v(1.3cm)
+      #s.advisors
+      #v(1.3cm)
+      #text(weight: "bold")[#advisor]
+      #v(2.2cm)
+      Instituto Nacional de Astrofísica, Óptica y Electrónica \
+      #text(size: 14.4pt)[© #department]
+      #v(1.25cm)
+      #if month != none and month != "" [#month, ]#year \
+      #s.place
     ]))
 }
 
@@ -132,6 +169,9 @@
   degree: "Grado",
   month: "",
   year: datetime.today().year(), // por defecto, el año actual
+  requirement: auto, // línea sobre el grado en la portada: auto = texto del idioma, none = omitirla, o un texto propio
+  cover: "thesis", // "thesis" (portada oficial de tesis) o "proposal" (formato de propuesta de la CCC)
+  department: "Coordinación de Ciencias Computacionales", // solo portada "proposal": texto tras el ©
 
   dedication: none,
   acknowledgements: none,
@@ -148,9 +188,18 @@
   set heading(numbering: "1.1")
   show heading.where(level: 1): set align(center)
   show heading.where(level: 1): chapter-head.with(s)
+  // Tablas: pie arriba, partibles entre páginas y sin texto justificado en celdas
+  show figure.where(kind: table): set figure.caption(position: top)
+  show figure.where(kind: table): set block(breakable: true)
+  show table: set par(justify: false)
 
   // Portada
-  cover(s, title, author, advisor, degree, month, year)
+  assert(cover in ("thesis", "proposal"), message: "cover must be \"thesis\" or \"proposal\"")
+  if cover == "proposal" {
+    cover-proposal(s, title, author, advisor, degree, month, year, department)
+  } else {
+    cover-thesis(s, title, author, advisor, degree, month, year, requirement)
+  }
 
   // Páginas preliminares (numeración romana)
   set page(paper: "us-letter",

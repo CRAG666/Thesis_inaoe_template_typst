@@ -91,6 +91,9 @@ Configura la plantilla editando la llamada `inaoe-thesis.with(...)`:
   degree: "Maestría en Ciencias Computacionales",
   month: "Octubre",
   // year: 2025,                 // opcional; por defecto el año actual
+  // requirement: none,          // opcional; none omite la línea "Tesis sometida como requisito...", o pasa tu propio texto
+  // cover: "proposal",          // opcional; portada de propuesta de tesis de la CCC en lugar de la portada de tesis
+  // department: "Coordinación de Ciencias Computacionales", // opcional; solo para la portada "proposal"
   dedication: [...],
   acknowledgements: [...],
   abstract: [...],
