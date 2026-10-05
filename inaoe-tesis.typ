@@ -141,6 +141,42 @@
     ]))
 }
 
+// ---- Métrica vertical ----------------------------------------
+// Medida en el formato de propuesta de la CCC (Propuesta_MLHJ.pdf, LaTeX
+// article 12pt): 17.33pt entre líneas base, parskip de 9pt y sangría de 10mm.
+// Typst mide el interlineado desde la altura de mayúsculas (top-edge) hasta
+// la línea base, así que leading = paso entre líneas base − altura de mayúsculas.
+#let pitch = 17.33pt     // paso entre líneas base del cuerpo
+#let parskip = 9pt       // espacio extra entre párrafos (0.75em)
+#let topsep = 9pt        // espacio extra antes y después de una lista
+#let body-cap = 7.94pt   // altura de mayúsculas de TeX Gyre Termes a 12pt
+#let leading = pitch - body-cap
+#let par-spacing = leading + parskip
+
+// Títulos de nivel 2+ (\subsection y \subsubsection del mismo formato):
+// distancias entre líneas base texto→título y título→texto, paso de línea
+// del propio título y altura de mayúsculas de su fuente (negrita 14.4pt / 12pt).
+#let section-levels = (
+  (before: 47pt, after: 34pt, pitch: 21.5pt, cap: 9.73pt),  // ==
+  (before: 43pt, after: 34pt, pitch: 17.33pt, cap: 8.11pt), // === y siguientes
+)
+
+// Listas (enumerate/itemize de LaTeX 12pt): topsep + parskip antes y después,
+// itemsep + parsep (= parskip) entre elementos; las anidadas son más compactas.
+#let list-depth = counter("inaoe-list-depth")
+#let list-block(it) = {
+  list-depth.step()
+  context {
+    let nested = list-depth.get().first() > 1
+    let gap = if nested { leading + 4.5pt } else { leading + topsep + parskip }
+    // Un set dentro del show no afecta a esta lista, solo a las anidadas en ella.
+    set enum(spacing: leading + 4pt)
+    set list(spacing: leading + 4pt)
+    block(above: gap, below: gap, it)
+  }
+  list-depth.update(n => n - 1)
+}
+
 // ---- Encabezado de capítulo (replica \@makechapterhead) ------
 #let chapter-head(s, it) = {
   pagebreak(weak: true)
@@ -157,7 +193,25 @@
     text(size: 24.88pt, weight: "bold", it.body))
   v(10pt)
   line(length: 100%)
-  v(60pt)
+  // Débil para que absorba el salto previo de una sección que abra el capítulo
+  // (como \addvspace en LaTeX); incluye el parskip de 9pt que un párrafo añadiría.
+  v(60pt + parskip, weak: true)
+}
+
+// ---- Encabezados de sección (niveles 2+) ----------------------
+#let section-head(it) = {
+  let lv = section-levels.at(if it.level == 2 { 0 } else { 1 })
+  block(sticky: true, above: lv.before - lv.cap, below: 0pt, context {
+    let (prefix, indent) = if it.numbering == none { ([], 0pt) } else {
+      let num = counter(heading).display(it.numbering)
+      // \quad entre número y título (\@seccntformat) y sangría francesa
+      (num + h(1em), measure(num).width + 1em.to-absolute())
+    }
+    par(justify: false, leading: lv.pitch - lv.cap, hanging-indent: indent, prefix + it.body)
+  })
+  // El salto posterior va como espacio débil: si sigue otro título se impone
+  // a su "above", igual que LaTeX, que no añade salto previo tras un título.
+  v(lv.after - body-cap, weak: true)
 }
 
 // ---- Plantilla principal -------------------------------------
@@ -184,10 +238,15 @@
   set document(title: title, author: if type(author) == str { author } else { "" })
   set text(lang: lang, size: 12pt,
     font: ("TeX Gyre Termes", "New Computer Modern"))
-  set par(leading: 1em, spacing: 0.75em, first-line-indent: 10mm, justify: true)
+  set par(leading: leading, spacing: par-spacing, first-line-indent: 10mm, justify: true)
   set heading(numbering: "1.1")
   show heading.where(level: 1): set align(center)
   show heading.where(level: 1): chapter-head.with(s)
+  show heading: it => if it.level == 1 { it } else { section-head(it) }
+  set enum(spacing: par-spacing)
+  set list(spacing: par-spacing)
+  show enum: list-block
+  show list: list-block
   // Tablas: pie arriba, partibles entre páginas y sin texto justificado en celdas
   show figure.where(kind: table): set figure.caption(position: top)
   show figure.where(kind: table): set block(breakable: true)
