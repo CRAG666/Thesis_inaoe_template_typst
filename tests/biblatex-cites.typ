@@ -1,4 +1,31 @@
-#import "../biblatex-cites/lib.typ": biblatex-cites
+#import "../biblatex-cites/lib.typ": _decode-name, _fmt-name, _fmt-title, _parse-bib, biblatex-cites, refs-as-cites
+
+// parser internals
+#assert.eq(_fmt-name("Smith, John"), "Smith")
+#assert.eq(_fmt-name("John Smith"), "Smith")
+#assert.eq(_fmt-name("Doe, Jane Q."), "Doe")
+#assert.eq(_fmt-name("Smith, John", initials: true), "J. Smith")
+#assert.eq(_fmt-name("John Smith", initials: true), "J. Smith")
+#assert.eq(_fmt-name("Doe, Jane Q.", initials: true), "J. Q. Doe")
+#assert.eq(_fmt-name("Smith"), "Smith")
+#assert.eq(_fmt-name("Smith,"), "Smith")
+#assert.eq(_fmt-name("Smith,", initials: true), "Smith")
+#assert.eq(_decode-name("Jo\\~{a}o"), "João")
+#assert.eq(_decode-name("Pawe\\l{} P{\\l}awiak"), "Paweł Pławiak")
+#assert.eq(_decode-name("Garc\\'{\\i}a"), "García")
+#assert.eq(_fmt-title("\n    {PPG}-based authentication: A\n    review\n  "), "PPG-based authentication: A review")
+#assert.eq(_parse-bib("@misc{k, booktitle = {Proc. X},\n  title = {Real title},}").k.title, "Real title")
+// field names are case-insensitive; years may be bare, braced or quoted
+#assert.eq(
+  _parse-bib("@Article{a, AUTHOR = \"Doe, J.\", Year = 2019}\n@book(b, editor = {Roe, R. and Poe, E.}, year = { 2021 })"),
+  (a: (authors: ("Doe",), year: "2019", title: ""), b: (authors: ("Roe", "Poe"), year: "2021", title: "")),
+)
+// `@` inside a field, @string/@comment blocks and `origyear` don't confuse the parser
+#assert.eq(
+  _parse-bib("@string{author = {Nobody}}\n@online{c, url = {https://x.org/@me{1}}, origyear = {1900}, author = {Ann Lee}, year = {2020}}\n@comment{year = 1999}"),
+  (c: (authors: ("Lee",), year: "2020", title: "")),
+)
+
 #let (textcite, parencite, citeauthor, citeyear, fullcite, citetitle, textcites, parencites, cites, autocite, footcite, footfullcite, supercite, nocite) = biblatex-cites(
   read("fixtures/cancelable.bib"),
   et-al-min: 99,
@@ -38,4 +65,10 @@
 
 #textcite(<Aguilar2025>). Several: #textcites("Rathgeb2011", "Sakr2022"). Grouped: #parencites("Rathgeb2011", "Sakr2022", "Hammad2026"); #cites("Farago2019", "Pinto2017"); auto #autocite("Sancho2018"). Super#supercite("Patel2015") and foot#footcite("Rathgeb2011") and full#footfullcite("Sakr2022").
 #nocite("Pinto2017", "Sancho2018")
+
+// @key of a .bib entry becomes a cite; refs to document labels stay refs
+#show ref: refs-as-cites(read("fixtures/cancelable.bib"))
+#set heading(numbering: "1.")
+= Section <sec>
+See @sec, @Patel2015 and @Hammad2019[p. 10].
 #bibliography("fixtures/cancelable.bib", style: "ieee")

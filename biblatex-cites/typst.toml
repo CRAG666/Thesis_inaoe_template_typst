@@ -7,3 +7,4 @@ license = "GPL-3.0-or-later"
 description = "biblatex-style cite commands (textcite, parencite, citeauthor, citeyear, fullcite) with separate in-text vs. bibliography author counts, parsed from the .bib."
 keywords = ["bibliography", "citation", "biblatex", "textcite", "ieee"]
 categories = ["scripting"]
+compiler = "0.13.0"

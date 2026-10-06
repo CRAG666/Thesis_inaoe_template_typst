@@ -5,6 +5,10 @@ entrypoint = "inaoe-tesis.typ"
 authors = ["Diego Aguilar (https://github.com/CRAG666)"]
 license = "GPL-3.0-or-later"
 description = "Thesis template for the Instituto Nacional de Astrofísica, Óptica y Electrónica."
+repository = "https://github.com/CRAG666/Thesis_inaoe_template_typst"
+keywords = ["thesis", "inaoe", "tesis", "dissertation", "proposal"]
+categories = ["thesis"]
+compiler = "0.13.0"
 
 [template]
 path = "template"

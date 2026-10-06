@@ -12,6 +12,10 @@
 //    #show: inaoe-thesis.with(lang: "en", title: ..., author: ..., ...)
 // ============================================================
 
+// Las citas se configuran desde el documento para leer su propia bibliografía.
+#import "biblatex-cites/lib.typ": biblatex-cites, refs-as-cites
+#let thesis-cites = biblatex-cites
+
 // Color institucional
 #let DBlue = rgb(40, 31, 109) // 0.156, 0.121, 0.427
 
@@ -70,7 +74,6 @@
 // Portada de tesis (formato oficial)
 #let cover-thesis(s, title, author, advisor, degree, month, year, requirement) = {
   set page(paper: "us-letter", margin: 0cm, numbering: none, header: none, footer: none)
-  set text(font: ("TeX Gyre Termes", "New Computer Modern"))
   cover-frame()
 
   // Bloque de texto centrado dentro del marco
@@ -116,7 +119,6 @@
 // Proporciones calibradas sobre propuestas aprobadas (2025).
 #let cover-proposal(s, title, author, advisor, degree, month, year, department) = {
   set page(paper: "us-letter", margin: 0cm, numbering: none, header: none, footer: none)
-  set text(font: ("TeX Gyre Termes", "New Computer Modern"), size: 12pt)
   cover-frame()
 
   // Bloque centrado vertical y horizontalmente entre el marco superior y el logotipo inferior
@@ -163,23 +165,22 @@
 
 // Listas (enumerate/itemize de LaTeX 12pt): topsep + parskip antes y después,
 // itemsep + parsep (= parskip) entre elementos; las anidadas son más compactas.
-#let list-depth = counter("inaoe-list-depth")
+#let nested-list-spacing = leading + 4pt
 #let list-block(it) = {
-  list-depth.step()
-  context {
-    let nested = list-depth.get().first() > 1
-    let gap = if nested { leading + 4.5pt } else { leading + topsep + parskip }
-    // Un set dentro del show no afecta a esta lista, solo a las anidadas en ella.
-    set enum(spacing: leading + 4pt)
-    set list(spacing: leading + 4pt)
-    block(above: gap, below: gap, it)
-  }
-  list-depth.update(n => n - 1)
+  // Una lista anidada hereda el `spacing` que fija aquí su lista padre; así se
+  // detecta el anidamiento sin contadores ni context (sin introspección).
+  let nested = it.spacing == nested-list-spacing
+  let gap = if nested { leading + 4.5pt } else { leading + topsep + parskip }
+  // Un set dentro del show no afecta a esta lista, solo a las anidadas en ella.
+  set enum(spacing: nested-list-spacing)
+  set list(spacing: nested-list-spacing)
+  block(above: gap, below: gap, it)
 }
 
 // ---- Encabezado de capítulo (replica \@makechapterhead) ------
 #let chapter-head(s, it) = {
   pagebreak(weak: true)
+  set align(center)
   let thick = line(length: 100%, stroke: 4pt)
   v(10pt)
   if it.numbering != none {
@@ -201,14 +202,14 @@
 // ---- Encabezados de sección (niveles 2+) ----------------------
 #let section-head(it) = {
   let lv = section-levels.at(if it.level == 2 { 0 } else { 1 })
-  block(sticky: true, above: lv.before - lv.cap, below: 0pt, context {
-    let (prefix, indent) = if it.numbering == none { ([], 0pt) } else {
-      let num = counter(heading).display(it.numbering)
-      // \quad entre número y título (\@seccntformat) y sangría francesa
-      (num + h(1em), measure(num).width + 1em.to-absolute())
-    }
-    par(justify: false, leading: lv.pitch - lv.cap, hanging-indent: indent, prefix + it.body)
-  })
+  // El show rule ya aporta context: no hace falta envolver en `context`.
+  let (prefix, indent) = if it.numbering == none { ([], 0pt) } else {
+    let num = counter(heading).display(it.numbering)
+    // \quad entre número y título (\@seccntformat) y sangría francesa
+    (num + h(1em), measure(num).width + 1em.to-absolute())
+  }
+  block(sticky: true, above: lv.before - lv.cap, below: 0pt,
+    par(justify: false, leading: lv.pitch - lv.cap, hanging-indent: indent, prefix + it.body))
   // El salto posterior va como espacio débil: si sigue otro título se impone
   // a su "above", igual que LaTeX, que no añade salto previo tras un título.
   v(lv.after - body-cap, weak: true)
@@ -240,9 +241,7 @@
     font: ("TeX Gyre Termes", "New Computer Modern"))
   set par(leading: leading, spacing: par-spacing, first-line-indent: 10mm, justify: true)
   set heading(numbering: "1.1")
-  show heading.where(level: 1): set align(center)
-  show heading.where(level: 1): chapter-head.with(s)
-  show heading: it => if it.level == 1 { it } else { section-head(it) }
+  show heading: it => if it.level == 1 { chapter-head(s, it) } else { section-head(it) }
   set enum(spacing: par-spacing)
   set list(spacing: par-spacing)
   show enum: list-block
@@ -251,6 +250,8 @@
   show figure.where(kind: table): set figure.caption(position: top)
   show figure.where(kind: table): set block(breakable: true)
   show table: set par(justify: false)
+  // `@clave` del .bib como cite directo: misma salida, una iteración menos.
+  show ref: if bib-source == none { it => it } else { refs-as-cites(bib-source) }
 
   // Portada
   assert(cover in ("thesis", "proposal"), message: "cover must be \"thesis\" or \"proposal\"")
@@ -298,7 +299,3 @@
   set heading(numbering: "A.1")
   body
 }
-
-// Las citas se configuran desde el documento para leer su propia bibliografía.
-#import "biblatex-cites/lib.typ": biblatex-cites
-#let thesis-cites = biblatex-cites
