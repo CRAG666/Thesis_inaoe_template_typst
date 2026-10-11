@@ -22,7 +22,7 @@
 // Cadenas por idioma
 #let strings(lang) = if lang == "es" {
   (
-    chapter: "Capítulo", contents: "Índice",
+    chapter: "Capítulo", appendix: "Apéndice", contents: "Índice",
     lof: "Lista de figuras", lot: "Lista de tablas",
     dedication: "Dedicatoria",
     acknowledgements: "Agradecimientos",
@@ -37,7 +37,7 @@
   )
 } else {
   (
-    chapter: "Chapter", contents: "Contents",
+    chapter: "Chapter", appendix: "Appendix", contents: "Contents",
     lof: "List of Figures", lot: "List of Tables",
     dedication: "Dedication",
     acknowledgements: "Acknowledgements",
@@ -178,14 +178,26 @@
 }
 
 // ---- Encabezado de capítulo (replica \@makechapterhead) ------
+// true a partir de #show: appendix (como \appendix en LaTeX).
+#let appendix-state = state("inaoe-appendix", false)
+
+// Figuras y ecuaciones numeradas por capítulo (Figura 3.2, (3.2)); en
+// apéndices, con la letra del apéndice (A.1).
+#let in-chapter(n) = numbering(
+  if appendix-state.get() { "A.1" } else { "1.1" }, counter(heading).get().first(), n)
+
 #let chapter-head(s, it) = {
   pagebreak(weak: true)
   set align(center)
   let thick = line(length: 100%, stroke: 4pt)
   v(10pt)
   if it.numbering != none {
+    // \chapter reinicia la numeración de figuras, tablas y ecuaciones
+    for kind in (image, table, raw) { counter(figure.where(kind: kind)).update(0) }
+    counter(math.equation).update(0)
+    let name = if appendix-state.get() { s.appendix } else { s.chapter }
     grid(columns: (1fr, auto, 1fr), column-gutter: 1em, align: horizon,
-      thick, smallcaps[#s.chapter #counter(heading).display(it.numbering)], thick)
+      thick, smallcaps[#name #counter(heading).display(it.numbering)], thick)
     v(10pt)
   }
   line(length: 100%)
@@ -241,6 +253,8 @@
     font: ("TeX Gyre Termes", "New Computer Modern"))
   set par(leading: leading, spacing: par-spacing, first-line-indent: 10mm, justify: true)
   set heading(numbering: "1.1")
+  set figure(numbering: in-chapter)
+  set math.equation(numbering: n => "(" + in-chapter(n) + ")")
   show heading: it => if it.level == 1 { chapter-head(s, it) } else { section-head(it) }
   set enum(spacing: par-spacing)
   set list(spacing: par-spacing)
@@ -268,8 +282,12 @@
   counter(page).update(1)
 
   outline(title: s.contents)
-  outline(title: s.lof, target: figure.where(kind: image))
-  outline(title: s.lot, target: figure.where(kind: table))
+  // Una lista vacía (y su página) se omite: sin figuras no hay "Lista de figuras".
+  for (title, kind) in ((s.lof, image), (s.lot, table)) {
+    context if query(figure.where(kind: kind)).len() > 0 {
+      outline(title: title, target: figure.where(kind: kind))
+    }
+  }
 
   for (title, content) in (
     (s.dedication, dedication),
@@ -295,6 +313,7 @@
 
 // Apéndices: capítulos numerados con letras (A, B, ...)
 #let appendix(body) = {
+  appendix-state.update(true)
   counter(heading).update(0)
   set heading(numbering: "A.1")
   body

@@ -49,6 +49,8 @@
     + "|(?-u:\\b)((?-u:\\w)+)(?-u:\\s)*=(?-u:\\s)*"
     + "(?:\\{((?:[^{}]|\\{[^{}]*\\})*)\\}|\"([^\"]*)\"|((?-u:\\w)+))",
 )
+// Solo las cabeceras `@tipo{clave,`: refs-as-cites no necesita los campos.
+#let _key-pattern = regex("@(?-u:\\w)+(?-u:\\s)*[{(](?-u:\\s)*([^\\x00-\\x20,={}()]+)(?-u:\\s)*,")
 
 #let _decode-name(raw) = {
   if not raw.contains("\\") { raw } else {
@@ -139,9 +141,9 @@
 // regla convierte en cite los ref a claves del .bib antes de resolverlos; el
 // resultado es idéntico. Uso: #show ref: refs-as-cites(read("references.bib"))
 #let refs-as-cites(bib-source) = {
-  let entries = _parse-bib(bib-source)
+  let keys = bib-source.matches(_key-pattern).map(m => (m.captures.first(), none)).to-dict()
   it => {
-    if it.form != "normal" or str(it.target) not in entries or type(it.supplement) == function {
+    if it.form != "normal" or str(it.target) not in keys or type(it.supplement) == function {
       it
     } else if it.supplement == auto {
       cite(it.target)

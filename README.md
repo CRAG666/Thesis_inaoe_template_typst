@@ -19,14 +19,13 @@ Spanish/English support.
 | `typst.toml` | Package metadata and `typst init` configuration. |
 | `inaoe-tesis.typ` | Thesis style, importable as `@local/inaoe-tesis:0.1.0`. |
 | `template/` | Files copied into each thesis by `typst init`: example, bibliography, and fonts. |
-| `example.typ`, `references.bib`, `fonts/` | Standalone example for working directly from this repository. |
 | `cover/` | Institutional logos bundled with the package. |
 | `biblatex-cites/` | `textcite`/`citeauthor`/… commands; also a standalone package (see its README). |
 
 ## Requirements
 
 - [Typst](https://github.com/typst/typst) (CLI or [web app](https://typst.app))
-- Fonts: the repo ships **TeX Gyre Termes** in `fonts/`. On
+- Fonts: the repo ships **TeX Gyre Termes** in `template/fonts/`. On
   [typst.app](https://typst.app) it's already available, so nothing to do there.
   The Typst CLI only bundles New Computer Modern, so point it at `fonts/` (below).
 
@@ -61,9 +60,19 @@ cd my-thesis
 ```
 
 `typst init` copies `example.typ`, `references.bib`, and `fonts/` into your
-project. The style and logos remain in the local package. To share a thesis
-without requiring a package installation, use a full copy of this repository
-and its `example.typ`, which imports the style through a relative path.
+project. The style and logos remain in the local package.
+
+To use the template without installing the package (e.g. uploading this
+repository to [typst.app](https://typst.app) to work with your advisor), write
+your thesis in `template/example.typ` and change its first line to import the
+style by path:
+
+```typst
+#import "/inaoe-tesis.typ": appendix, inaoe-thesis, thesis-cites
+```
+
+With the CLI, compile from the repository root:
+`typst compile --root . --ignore-system-fonts --font-path template/fonts template/example.typ`.
 
 ## Usage
 
@@ -139,9 +148,16 @@ layout pass (about 25% less compile time on a ~120-page thesis). The
 `citeauthor`/`citeyear` aliases produce plain text and are faster than
 `#cite(form: "author")`/`#cite(form: "year")`.
 
+### Numbering
+
+Figures, tables and equations are numbered per chapter, as in LaTeX
+(Figure 3.2, equation (3.2)). Every display equation gets a number; for an
+unnumbered one use `#math.equation(numbering: none, block: true, $ ... $)`.
+The lists of figures and tables are omitted when the thesis has none.
+
 ### Appendices
 
-Switch to letter-numbered chapters (A, B, …) before the bibliography:
+Switch to letter-numbered chapters ("Appendix A", "Appendix B", …) before the bibliography:
 
 ```typst
 #show: appendix

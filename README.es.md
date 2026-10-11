@@ -19,14 +19,13 @@ diseño de página, las páginas preliminares y el soporte español/inglés.
 | `typst.toml` | Metadatos del paquete y configuración de `typst init`. |
 | `inaoe-tesis.typ` | Estilo de la tesis, importable como `@local/inaoe-tesis:0.1.0`. |
 | `template/` | Archivos que `typst init` copia a cada tesis: ejemplo, bibliografía y fuentes. |
-| `example.typ`, `references.bib`, `fonts/` | Ejemplo autocontenido para trabajar directamente desde este repositorio. |
 | `cover/` | Logotipos institucionales incluidos en el paquete. |
 | `biblatex-cites/` | Comandos `textcite`/`citeauthor`/…; también es un paquete independiente (ver su README). |
 
 ## Requisitos
 
 - [Typst](https://github.com/typst/typst) (CLI o [app web](https://typst.app))
-- Fuentes: el repo incluye **TeX Gyre Termes** en `fonts/`. En
+- Fuentes: el repo incluye **TeX Gyre Termes** en `template/fonts/`. En
   [typst.app](https://typst.app) ya están disponibles, así que ahí no hay que
   hacer nada. El CLI de Typst solo trae New Computer Modern, por eso hay que
   apuntarlo a `fonts/` (abajo).
@@ -62,9 +61,19 @@ cd mi-tesis
 ```
 
 `typst init` copia `example.typ`, `references.bib` y `fonts/` al proyecto.
-El estilo y los logotipos permanecen en el paquete local. Para compartir una
-tesis sin exigir su instalación, usa una copia completa de este repositorio y
-su `example.typ`, que importa la plantilla por ruta relativa.
+El estilo y los logotipos permanecen en el paquete local.
+
+Para usar la plantilla sin instalar el paquete (p. ej. subiendo este
+repositorio a [typst.app](https://typst.app) para trabajar con tu asesor),
+escribe la tesis en `template/example.typ` y cambia su primera línea para
+importar el estilo por ruta:
+
+```typst
+#import "/inaoe-tesis.typ": appendix, inaoe-thesis, thesis-cites
+```
+
+Con el CLI, compila desde la raíz del repositorio:
+`typst compile --root . --ignore-system-fonts --font-path template/fonts template/example.typ`.
 
 ## Uso
 
@@ -141,9 +150,16 @@ una pasada de layout completa (en una tesis de ~120 páginas, ~25 % menos
 tiempo de compilación). Los alias `citeauthor`/`citeyear` producen texto
 plano y son más rápidos que `#cite(form: "author")`/`#cite(form: "year")`.
 
+### Numeración
+
+Figuras, tablas y ecuaciones se numeran por capítulo, como en LaTeX
+(Figura 3.2, ecuación (3.2)). Toda ecuación en bloque lleva número; para una
+sin número usa `#math.equation(numbering: none, block: true, $ ... $)`.
+Las listas de figuras y de tablas se omiten si la tesis no tiene ninguna.
+
 ### Apéndices
 
-Cambia a capítulos numerados con letras (A, B, …) antes de la bibliografía:
+Cambia a capítulos numerados con letras («Apéndice A», «Apéndice B», …) antes de la bibliografía:
 
 ```typst
 #show: appendix
